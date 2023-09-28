@@ -10,18 +10,18 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mori1704/usagi.git"
+    "url": "git+https://github.com/1704mori/usagi.git"
   },
   "keywords": [
     "amqplib",
     "rabbitmq"
   ],
-  "author": "mori1704",
+  "author": "1704mori",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mori1704/usagi/issues"
+    "url": "https://github.com/1704mori/usagi/issues"
   },
-  "homepage": "https://github.com/mori1704/usagi#readme",
+  "homepage": "https://github.com/1704mori/usagi#readme",
   "devDependencies": {
     "@types/amqplib": "^0.10.2",
     "tslint": "^6.1.3",
