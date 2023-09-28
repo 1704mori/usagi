@@ -1,9 +1,9 @@
 import * as amqp from "amqplib";
 
 interface RabbitConfig {
-  AMQP_DNS: string;
+  uri: string;
   exchange: string;
-  exchangeType: string;
+  exchangeType: "topic";
 }
 
 export class AmqpService {
@@ -26,7 +26,7 @@ export class AmqpService {
       return this;
     }
 
-    this.connection = await amqp.connect(this.config.AMQP_DNS, {
+    this.connection = await amqp.connect(this.config.uri, {
       clientProperties: {
         connection_name: name,
       },
@@ -192,13 +192,11 @@ export class AmqpService {
       }
 
       if (retry) {
-        console.log(
-          "[queue] Message processing failed after retries. Acknowledging and moving to dead-letter queue."
-        );
         this.channel?.ack(message);
+        console.log("[queue] message processed successfully");
       } else {
-        console.log("[queue] Message processed successfully. Acknowledging.");
         this.channel?.nack(message, false, false);
+        console.log("[queue] message processing failed");
       }
     });
   }

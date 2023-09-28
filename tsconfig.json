@@ -3,6 +3,7 @@
     "target": "esnext",
     "module": "CommonJS",
     "outDir": "./dist",
+    "declaration": true,
     "rootDir": "./src",
     "strict": true
   },
