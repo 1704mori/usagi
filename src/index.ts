@@ -1,1 +1,1 @@
-export { AmqpService } from "./lib/amqp";
+export { Usagi } from "./lib/usagi";
