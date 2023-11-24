@@ -21,6 +21,12 @@ To install the Usagi, use the following command:
 
 ```bash
 npm install --save usagiq
+
+# or
+yarn add usagiq
+
+# or
+pnpm add usagiq
 ```
 
 ## Usage
