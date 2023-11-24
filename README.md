@@ -20,23 +20,23 @@ Usagi provides a simple and flexible interface for interacting with RabbitMQ, in
 To install the Usagi, use the following command:
 
 ```bash
-npm install --save rabbitmq-service
+npm install --save usagiq
 ```
 
 ## Usage
 
 ```typescript
-import { AmqpService } from 'rabbitmq-service';
+import { Usagi } from 'usagiq';
 
 // RabbitMQ configuration
 const rabbitConfig = {
-  uri: 'amqp://localhost',
+  uri: 'amqp://user:pass@host:port/vhost',
   exchange: 'your_exchange_name',
   exchangeType: 'topic',
 };
 
-// Create an instance of AmqpService
-const amqp = new AmqpService(rabbitConfig);
+// Create an instance of Usagi
+const amqp = new Usagi(rabbitConfig);
 
 // Initialize the service
 await amqp.initialize('your_connection_name');
