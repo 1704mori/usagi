@@ -1,6 +1,6 @@
 {
   "name": "usagiq",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A simple and flexible interface for interacting with RabbitMQ",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
