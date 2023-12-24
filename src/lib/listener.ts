@@ -4,6 +4,7 @@ import { Connection } from "./connection";
 export class Listener {
   private retryCount: number = 0;
   private _retryTimeout: number = 60000;
+  private _dontSetupNack = false;
 
   constructor(private connectionManager: Connection, private queueName: string) { }
 
@@ -17,11 +18,19 @@ export class Listener {
     return this;
   }
 
+  public dontSetupNack() {
+    this._dontSetupNack = true;
+    return this;
+  }
+
   public async listen<T = any>(callback: (message: T) => boolean | Promise<boolean>): Promise<void> {
     const channel = this.connectionManager.getChannel();
 
     const nackQueueName = `${this.queueName}.nack`;
-    await this.setupNackQueue(channel, nackQueueName);
+
+    if (!this._dontSetupNack) {
+      await this.setupNackQueue(channel, nackQueueName);
+    }
 
     await this.setupMainQueue(channel);
 
@@ -85,5 +94,17 @@ export class Listener {
     channel.ack(msg);
     console.log("[queue] a message reached max retry count, queue %s acked", this.queueName)
   }
-}
 
+  private async resolvePromise<T>(promise: Promise<T>): Promise<[T, Error | null]> {
+  try {
+    const data = await promise;
+    return [data, null];
+  } catch (error) {
+    if (error instanceof Error) {
+      return [null as any, error];
+    } else {
+      return [null as any, new Error(String(error))];
+    }
+  }
+}
+}
