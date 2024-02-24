@@ -4,14 +4,14 @@ export type ConnectionConfig = {
   uri: string;
   exchange: string;
   exchangeType: "topic";
-}
+};
 
 export class Connection {
   private connection: amqp.Connection | null = null;
   private channel: amqp.Channel | null = null;
   private exchange: string | null = null;
 
-  constructor(private config: ConnectionConfig) { }
+  constructor(private config: ConnectionConfig) {}
 
   public async initialize(name: string): Promise<this> {
     if (this.connection) {
@@ -25,12 +25,12 @@ export class Connection {
       },
     });
 
-    this.connection.on("error", () => {
-      console.log("[queue] connection %s error", name);
+    this.connection.on("error", (err) => {
+      console.log("[queue] connection %s error", name, err);
     });
 
-    this.connection.on("close", () => {
-      console.log("[queue] connection %s closed", name);
+    this.connection.on("close", (err) => {
+      console.log("[queue] connection %s closed", name, err);
     });
 
     console.log("[queue] new connection %s created", name);
@@ -41,12 +41,16 @@ export class Connection {
       this.config.exchangeType,
       {
         durable: true,
-      }
+      },
     );
 
     this.exchange = this.config.exchange;
 
     console.log("[queue] channel %s created", this.config.exchange);
+
+    this.channel.on("error", (err) => {
+      console.log("[queue] channel error", err);
+    });
 
     return this;
   }

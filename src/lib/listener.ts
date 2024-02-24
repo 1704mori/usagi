@@ -6,7 +6,10 @@ export class Listener {
   private _retryTimeout: number = 60000;
   private _dontSetupNack = false;
 
-  constructor(private connectionManager: Connection, private queueName: string) { }
+  constructor(
+    private connectionManager: Connection,
+    private queueName: string,
+  ) {}
 
   public retry(count: number): this {
     this.retryCount = count;
@@ -23,8 +26,15 @@ export class Listener {
     return this;
   }
 
-  public async listen<T = any>(callback: (message: T) => boolean | Promise<boolean>): Promise<void> {
+  public async listen<T = any>(
+    callback: (message: T) => boolean | Promise<boolean>,
+  ): Promise<void> {
     const channel = this.connectionManager.getChannel();
+
+    if (!channel) {
+      console.log("[usagi]: channel not found, couldn't publish message");
+      return;
+    }
 
     const nackQueueName = `${this.queueName}.nack`;
 
@@ -56,7 +66,10 @@ export class Listener {
     await channel.consume(this.queueName, consumeFn, { noAck: false });
   }
 
-  private async setupNackQueue(channel: amqp.Channel, nackQueueName: string): Promise<void> {
+  private async setupNackQueue(
+    channel: amqp.Channel,
+    nackQueueName: string,
+  ): Promise<void> {
     await channel.assertQueue(nackQueueName, {
       durable: true,
       arguments: {
@@ -65,7 +78,11 @@ export class Listener {
         "x-message-ttl": this._retryTimeout,
       },
     });
-    await channel.bindQueue(nackQueueName, this.connectionManager["config"].exchange, nackQueueName);
+    await channel.bindQueue(
+      nackQueueName,
+      this.connectionManager["config"].exchange,
+      nackQueueName,
+    );
   }
 
   private async setupMainQueue(channel: amqp.Channel): Promise<void> {
@@ -74,37 +91,61 @@ export class Listener {
       deadLetterRoutingKey: `${this.queueName}.nack`,
       durable: true,
     });
-    await channel.bindQueue(this.queueName, this.connectionManager["config"].exchange, this.queueName);
+    await channel.bindQueue(
+      this.queueName,
+      this.connectionManager["config"].exchange,
+      this.queueName,
+    );
   }
 
-  private async handleNack(channel: amqp.Channel, msg: amqp.ConsumeMessage, nackQueueName: string): Promise<void> {
+  private async handleNack(
+    channel: amqp.Channel,
+    msg: amqp.ConsumeMessage,
+    nackQueueName: string,
+  ): Promise<void> {
     const retryCount = msg.properties.headers?.["x-retry-count"] || 0;
 
     if (retryCount < this.retryCount) {
-      channel.publish(this.connectionManager["config"].exchange, this.queueName, msg.content, {
-        headers: { "x-retry-count": retryCount + 1 },
-        persistent: true,
-      });
-      console.log("[queue] a message message was requeued", msg.properties.messageId)
+      channel.publish(
+        this.connectionManager["config"].exchange,
+        this.queueName,
+        msg.content,
+        {
+          headers: { "x-retry-count": retryCount + 1 },
+          persistent: true,
+        },
+      );
+      console.log(
+        "[queue] a message message was requeued",
+        msg.properties.messageId,
+      );
     } else {
       channel.sendToQueue(nackQueueName, msg.content, { persistent: true });
-      console.log("[queue] a message was moved to nack queue %s", nackQueueName)
+      console.log(
+        "[queue] a message was moved to nack queue %s",
+        nackQueueName,
+      );
     }
 
     channel.ack(msg);
-    console.log("[queue] a message reached max retry count, queue %s acked", this.queueName)
+    console.log(
+      "[queue] a message reached max retry count, queue %s acked",
+      this.queueName,
+    );
   }
 
-  private async resolvePromise<T>(promise: Promise<T>): Promise<[T, Error | null]> {
-  try {
-    const data = await promise;
-    return [data, null];
-  } catch (error) {
-    if (error instanceof Error) {
-      return [null as any, error];
-    } else {
-      return [null as any, new Error(String(error))];
+  private async resolvePromise<T>(
+    promise: Promise<T>,
+  ): Promise<[T, Error | null]> {
+    try {
+      const data = await promise;
+      return [data, null];
+    } catch (error) {
+      if (error instanceof Error) {
+        return [null as any, error];
+      } else {
+        return [null as any, new Error(String(error))];
+      }
     }
   }
-}
 }
