@@ -1,6 +1,9 @@
 name: Publish to npmjs
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
     types: [closed]
     branches:
