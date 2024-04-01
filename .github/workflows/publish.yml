@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up dummy environment variable for illustration
+      - name: Setup repo owner variable
         run: echo "REPO_OWNER_MATCH=$(if [ '${{ github.repository_owner }}' = 'expected-owner-name' ]; then echo 'true'; else echo 'false'; fi)" >> $GITHUB_ENV
       
       - name: Conditional step based on environment variable
@@ -22,9 +22,6 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 0
 
       - name: Setup node
         uses: actions/setup-node@v3
