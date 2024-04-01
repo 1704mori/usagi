@@ -42,6 +42,9 @@ jobs:
           npm version patch
           git push && git push --tags
 
+      - name: Configure npm
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+
       - name: Publish
         run: npm publish
         env:
