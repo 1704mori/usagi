@@ -12,8 +12,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true || github.repository_owner == "${{ secrets.GH_NAME }}"
     steps:
+      - name: Set up dummy environment variable for illustration
+        run: echo "REPO_OWNER_MATCH=$(if [ '${{ github.repository_owner }}' = 'expected-owner-name' ]; then echo 'true'; else echo 'false'; fi)" >> $GITHUB_ENV
+      
+      - name: Conditional step based on environment variable
+        if: env.REPO_OWNER_MATCH == 'true'
+        run: echo "This step runs only if the repository owner matches the expected name."
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
