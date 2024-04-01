@@ -12,13 +12,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true || github.repository_owner == '1704mori'
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true || github.repository_owner == '${{ secrets.GH_NAME }}'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: true
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -34,6 +31,8 @@ jobs:
 
       - name: Bump version & push
         run: |
+          git config --global user.email "${{ secrets.GH_EMAIL }}"
+          git config --global user.name "${{ secrets.GH_NAME }}"
           npm version patch
           git push && git push --tags
 
